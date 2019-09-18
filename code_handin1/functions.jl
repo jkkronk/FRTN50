@@ -102,17 +102,18 @@ Compute the proximal operator of the indicator function for the box contraint
 where the inequalites are applied element-wise.
 """
 function prox_box(x,a,b,gamma)
-	retvec = zeros((y))
-	for (i, e) in enumerate(y)
-		if e .< a
-			retvec[i] = a
-		elseif e .> b
-			retvec[i] = b
+	retvec = zeros(length(x))
+	for (i, e) in enumerate(x)
+		if e < a[i]
+			print("hej")
+			retvec[i] = a[i]
+		elseif e > b[i]
+			retvec[i] = b[i]
 		else
 			retvec[i] = e
 		end
 	end
-	return y' * retvec
+	return retvec
 end
 
 
