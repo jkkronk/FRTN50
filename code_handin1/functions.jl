@@ -105,7 +105,6 @@ function prox_box(x,a,b,gamma)
 	retvec = zeros(length(x))
 	for (i, e) in enumerate(x)
 		if e < a[i]
-			print("hej")
 			retvec[i] = a[i]
 		elseif e > b[i]
 			retvec[i] = b[i]
@@ -129,17 +128,17 @@ for the box contraint
 where the inequalites are applied element-wise.
 """
 function prox_boxconj(y,a,b,gamma)
-	retvec = zeros((y))
+	retvec = zeros(length(y))
 	for (i, e) in enumerate(y)
-		if e .< a
-			retvec[i] = e - gamma * a
-		elseif e .> b
-			retvec[i] = e - gamma * b
+		if e .< a[i]
+			retvec[i] = e - gamma * a[i]
+		elseif e .> b[i]
+			retvec[i] = e - gamma * b[i]
 		else
 			retvec[i] = 0
 		end
 	end
-	return y' * retvec
+	return retvec
 end
 
 
