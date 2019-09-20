@@ -130,9 +130,9 @@ where the inequalites are applied element-wise.
 function prox_boxconj(y,a,b,gamma)
 	retvec = zeros(length(y))
 	for (i, e) in enumerate(y)
-		if e .< a[i]
+		if e .< a[i]*gamma
 			retvec[i] = e - gamma * a[i]
-		elseif e .> b[i]
+		elseif e .> b[i]*gamma
 			retvec[i] = e - gamma * b[i]
 		else
 			retvec[i] = 0
