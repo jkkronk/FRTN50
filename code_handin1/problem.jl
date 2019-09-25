@@ -26,7 +26,7 @@ end
 Q,q,a,b,n = problem_data()
 itrs1 = 5000
 init_value = 1
-gamma = 1/(maximum(eigvals(Q))) # 0 < gamma*I - Q, e.i. pos. def.
+gamma = 0.01/(maximum(eigvals(Q))) # 0 < gamma*I - Q, e.i. pos. def.
 
 
 x_vals = zeros((n,itrs1))
@@ -45,12 +45,12 @@ end
 
 using Plots
 # Create a new plot dual prob norm
-plot(log.(x_res_norm'))
-ylabel!("||x^(k+1)-x^k||")
+plot(log.(x_res_norm'), margin=5Plots.mm)
+ylabel!("ln||x^(k+1)-x^k||")
 xlabel!("Iterations")
 
 
-savefig("task62.png")
+savefig("task6_gamma_001.png")
 
 plot(x_vals[1,:], label = "x_1")
 plot!(a[1]*ones(itrs), label = "a_1")
@@ -65,7 +65,7 @@ itrs = 30000
 init_value = 1
 mu = zeros((n,itrs))
 x_prim = zeros((n,itrs))
-gamma = 1/(maximum(eigvals(inv(Q)))) # 0 < gamma*I - Q, e.i. pos. def.
+gamma = 1.5/(maximum(eigvals(inv(Q)))) # 0 < gamma*I - Q, e.i. pos. def.
 
 mu[:, 1] = ones((n,1))*init_value #init_value
 x_prim[:, 1] = ones((n,1))*init_value #init_value
@@ -83,14 +83,14 @@ end
 
 # Create a new plot
 plot(log.(x_prim_norm'))
-ylabel!("||x^(k+1)-x^k||")
+ylabel!("ln||x^(k+1)-x^k||")
 xlabel!("Iterations")
 
-plot(log.(mu_norm'))
-ylabel!("||mu^(k+1)-mu^k||")
+plot(log.(mu_norm'), margin=5Plots.mm)
+ylabel!("ln||mu^(k+1)-mu^k||")
 xlabel!("Iterations")
 
-savefig("task7gamma01.png")
+savefig("task7_gamma_001.png")
 
 plot(mu[1,:], label = "x_1")
 plot!(a[1]*ones(itrs), label = "a_1")
@@ -115,3 +115,18 @@ plot(fxi')
 xlabel!("iterations")
 ylabel!("f(x'^k)+i(x'^k)")
 savefig("fxprim.png")
+
+# RÄTT?!?!? Går inte mot noll så nej, It is actually not just a numerical error.
+# 
+# From manual:
+# Does \hat{x}^k always satisfy the constraint \hat{x}^k \in S?
+# If you check the distance from \hat{x}^k to S, for example as
+# ||\hat{x}^k - prox_{i_S}(\hat{x}^k)||
+# you will see that although the distance is usually >0 it does decrease towards 0 when k increases.
+
+x_prim_mu = zeros((1,itrs))
+for i = 1:itrs
+	x_prim_mu[i] = opnorm((x_prim[:,i]-mu[:,i])')
+end
+
+plot(log.(x_prim_mu'))
