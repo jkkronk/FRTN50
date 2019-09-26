@@ -24,10 +24,9 @@ function problem_data()
 end
 
 Q,q,a,b,n = problem_data()
-itrs1 = 5000
-init_value = 1
-gamma = 0.01/(maximum(eigvals(Q))) # 0 < gamma*I - Q, e.i. pos. def.
-
+itrs1 = 10000
+init_value = 100
+gamma = 1.5/(maximum(eigvals(Q))) # 0 < gamma*I - Q, e.i. pos. def.
 
 x_vals = zeros((n,itrs1))
 
@@ -49,7 +48,6 @@ plot(log.(x_res_norm'), margin=5Plots.mm)
 ylabel!("ln||x^(k+1)-x^k||")
 xlabel!("Iterations")
 
-
 savefig("task6_gamma_001.png")
 
 plot(x_vals[1,:], label = "x_1")
@@ -58,7 +56,6 @@ plot!(b[1]*ones(itrs), label = "b_1")
 
 xlabel!("iterations")
 savefig("task66.png")
-
 
 # TASK 7
 itrs = 30000
@@ -117,7 +114,7 @@ ylabel!("f(x'^k)+i(x'^k)")
 savefig("fxprim.png")
 
 # RÄTT?!?!? Går inte mot noll så nej, It is actually not just a numerical error.
-# 
+#
 # From manual:
 # Does \hat{x}^k always satisfy the constraint \hat{x}^k \in S?
 # If you check the distance from \hat{x}^k to S, for example as
