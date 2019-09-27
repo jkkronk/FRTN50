@@ -6,20 +6,9 @@ using ProximalOperators
 
 ##################################
 #Least Squares Regression
-#TASK 1-4
 ##################################
 
-x,y = leastsquares_data()
-
-#### PARAMS ####
-q = 3
-n = size(x)[1]
-
-
-
-plot(x,y, seriestype=:scatter)
-savefig("/Users/JonatanMBA/google drive/lth/frtn50/plots_hi2/xyplot_logreg.png")
-
+#### TASK 1 ####
 function r(x)
 	"""
 	Scales vetor to [-1,1]
@@ -36,84 +25,75 @@ function r(x)
 	return x_scaled
 end
 
-x_scaled = r(x)
+function create_X(x,p)
+	"""
+	Creates a feature vector map with given data and polynimial p
+	:param: given x data
+	:param: polynimial order
+	:return: feature map
+	"""
 
-function create_X(x,q)
-	X_ret = zeros(size(x)[1],q+1)
-	for i = 1:q+1
-		X_ret[:,i] = x.^i
+	X_ret = zeros(p+1,size(x)[1])
+	for i = 0:p
+		X_ret[i+1,:] = x'.^i
 	end
 	return X_ret
 end
 
-X_scaled = create_X(x_scaled,q)
+function least_squares(x, y, p, λ, itrs)
+	"""
+	Performs least squares to find model vector w and
+	:param: given x data
+	:param: given y data
+	:param: polynomial order
+	:param: given step_size lambda
+	:param: iterations for prox gradient method
+	:return: model weight vector
+	"""
+	n= size(x)[1]
 
-step_size = inv(maximum(eigvals(X_scaled*X_scaled')))
+	x_scaled = r(x)
+	X_scaled = create_X(x_scaled,p)
 
-w  = ones(n,q+1)
+	step_size = inv(maximum(eigvals(X_scaled*X_scaled')))
 
-for i = 2:11
+	w  = ones(p+1,itrs)
 
+	for i = 2:itrs
+		grad_fw, _ = gradient(SqrNormL2(1), (X_scaled'*w[:,i-1].-y))
+		wnorm =  SqrNormL2(2 * λ)
+		w[:,i], _ = prox(wnorm, w[:,i-1] - step_size .* X_scaled *  grad_fw, step_size)
+	end
 
-
+	return w
 
 end
 
-
-
-
-############ PARAMS
-regularization = 1
-itrs = 10000
-init_value = 1
-
-
-fSqrNorm = SqrNormL2() # Create the function 1
-
-function_f(w) = (1/2) * fSqrNorm(x_scaled'*w-y) + regularization * NormL2(w)^2
-##
-
-fSqrNorm((x_scaled'*w[:,1]-y)')
-
-x_scaled*w[:,1]-y
-
-size(x_scaled')
-size(w[:,1]')
-size(y)
-
-function_f(w[:,1])
-##
-w = ones(11,itrs)
-df, _ = gradient(function_f, w[:,1])
-
-
-
-val = f1([1.0, 1.0]) # val = 1.0
-df, _ = gradient(f1, [1.0, 1.0]) # df = [1.0, 1.0]
-pf, _ = prox(f1, [1.0, 1.0], 0.5) # pf = [0.6666..., 0.6666...]
-
-norm_function = NormL2()
-
-
-
-
-w = ones(11,itrs)
-for i = 2:11
-	print(i)
-	f(w) = (1/2)*opnorm((x_scaled*w'-y)')^2
-
-
-
-	w[:,i] = prox(function_w,w[:,i-1]-step_size*gradnorm)
+function model(w, x, p)
+	"""
+	Predicts values for least square regression w*x=y
+	:param: weight vector
+	:param: linspace data vector
+	:param: polynomial order
+	:return: predicted values
+	"""
+	x_scaled = r(x)
+	X_scaled = create_X(x_scaled,p)
+	return (w[:,end]'*X_scaled)'
 end
 
+#### Task 2-3 ####
+x,y = leastsquares_data() # Given Data
+p = 10 # Polynomial order
+λ = 2 # Regression factor
+w = least_squares(x, y, p, λ, 5000000)
 
+plot(x,y, seriestype=:scatter, marker = 3,label="(x,y)data", xlims=[-1.05,3.05],ylims=[-7,7])
 
-f(w) = (1/2)*opnorm((x_scaled'*w-y)')^2
-f(w[:,1])
+x_axis = LinRange(-1.2, 3.2, 1000)
 
-fw = gradient!(f, w[:,1])
+y_model = model(w,x_axis,p)
 
+plot!(x_axis,y_model, ylims=(-10,10),label="model_w(x)")
 
-print(size(x_scaled*w[:,1]'))
-gradient!(f, w[:,1])
+savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2p10.png")
