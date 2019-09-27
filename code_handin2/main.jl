@@ -11,6 +11,12 @@ using ProximalOperators
 
 x,y = leastsquares_data()
 
+#### PARAMS ####
+q = 3
+n = size(x)[1]
+
+
+
 plot(x,y, seriestype=:scatter)
 savefig("/Users/JonatanMBA/google drive/lth/frtn50/plots_hi2/xyplot_logreg.png")
 
@@ -32,17 +38,27 @@ end
 
 x_scaled = r(x)
 
-step_size = inv(maximum(eigvals(x*x')))
-
 function create_X(x,q)
 	X_ret = zeros(size(x)[1],q+1)
 	for i = 1:q+1
-		X_ret(:,i) = x.^q
+		X_ret[:,i] = x.^i
 	end
 	return X_ret
 end
 
-x2 = create_X(x,2)
+X_scaled = create_X(x_scaled,q)
+
+step_size = inv(maximum(eigvals(X_scaled*X_scaled')))
+
+w  = ones(n,q+1)
+
+for i = 2:11
+
+
+
+
+end
+
 
 
 
@@ -50,6 +66,7 @@ x2 = create_X(x,2)
 regularization = 1
 itrs = 10000
 init_value = 1
+
 
 fSqrNorm = SqrNormL2() # Create the function 1
 
