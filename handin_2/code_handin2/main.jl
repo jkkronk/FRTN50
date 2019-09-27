@@ -40,13 +40,14 @@ function create_X(x,p)
 	return X_ret
 end
 
-function least_squares(x, y, p, λ, itrs)
+function least_squares(x, y, p, λ, q ,itrs)
 	"""
 	Performs least squares to find model vector w and
 	:param: given x data
 	:param: given y data
 	:param: polynomial order
 	:param: given step_size lambda
+	:param: NormL1: q=1 or SqrNormL2: q=2
 	:param: iterations for prox gradient method
 	:return: model weight vector
 	"""
@@ -61,7 +62,13 @@ function least_squares(x, y, p, λ, itrs)
 
 	for i = 2:itrs
 		grad_fw, _ = gradient(SqrNormL2(1), (X_scaled'*w[:,i-1].-y))
-		wnorm =  SqrNormL2(2 * λ)
+
+		if q == 2
+			wnorm =  SqrNormL2(2 * λ)
+		else
+			wnorm = NormL1(λ)
+		end
+
 		w[:,i], _ = prox(wnorm, w[:,i-1] - step_size .* X_scaled *  grad_fw, step_size)
 	end
 
@@ -85,8 +92,9 @@ end
 #### Task 2-3 ####
 x,y = leastsquares_data() # Given Data
 p = 10 # Polynomial order
-λ = 2 # Regression factor
-w = least_squares(x, y, p, λ, 5000000)
+λ = 0 # Regression factor
+q = 1
+w = least_squares(x, y, p, λ, q, 500000)
 
 plot(x,y, seriestype=:scatter, marker = 3,label="(x,y)data", xlims=[-1.05,3.05],ylims=[-7,7])
 
@@ -96,4 +104,4 @@ y_model = model(w,x_axis,p)
 
 plot!(x_axis,y_model, ylims=(-10,10),label="model_w(x)")
 
-savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2p10.png")
+#savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2p10q2.png")
