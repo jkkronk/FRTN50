@@ -9,16 +9,17 @@ using ProximalOperators
 #TASK 1-4
 ##################################
 
-
-
-
 x,y = leastsquares_data()
 
 plot(x,y, seriestype=:scatter)
-
 savefig("/Users/JonatanMBA/google drive/lth/frtn50/plots_hi2/xyplot_logreg.png")
 
 function r(x)
+	"""
+	Scales vetor to [-1,1]
+	:param: vector
+	:return: scaled vector
+	"""
 	x_max = maximum(x)
 	x_min = minimum(x)
 
@@ -31,7 +32,19 @@ end
 
 x_scaled = r(x)
 
-step_size = inv(opnorm(x*x'))
+step_size = inv(maximum(eigvals(x*x')))
+
+function create_X(x,q)
+	X_ret = zeros(size(x)[1],q+1)
+	for i = 1:q+1
+		X_ret(:,i) = x.^q
+	end
+	return X_ret
+end
+
+x2 = create_X(x,2)
+
+
 
 ############ PARAMS
 regularization = 1
