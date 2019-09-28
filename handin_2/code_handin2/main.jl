@@ -91,17 +91,30 @@ end
 
 #### Task 2-3 ####
 x,y = leastsquares_data() # Given Data
-p = 10 # Polynomial order
+p = 3 # Polynomial order
 λ = 0 # Regression factor
-q = 1
-w = least_squares(x, y, p, λ, q, 500000)
+q = 2
+w = least_squares(x, y, p, λ, q, 5000000)
 
 plot(x,y, seriestype=:scatter, marker = 3,label="(x,y)data", xlims=[-1.05,3.05],ylims=[-7,7])
 
+#### Model fit/plot
 x_axis = LinRange(-1.2, 3.2, 1000)
-
 y_model = model(w,x_axis,p)
-
 plot!(x_axis,y_model, ylims=(-10,10),label="model_w(x)")
+ylabel!("y")
+xlabel!("rescaled x")
 
-#savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2p10q2.png")
+#savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task4/task4p3l0d2.png")
+
+#### Model convergence rate
+itrs_w = zeros(size(w)[2])
+for i = 1:length(itrs_w)
+	itrs_w[i] = opnorm((w[:,i])')
+end
+
+plot(itrs_w, ylim=[0,25],xlim=[0,500])
+ylabel!("|w|")
+xlabel!("iterations")
+
+#savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task4/task4p3l0d2_c.png")
