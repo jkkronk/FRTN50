@@ -53,7 +53,7 @@ function least_squares(x, y, p, λ, q ,itrs)
 	"""
 	n= size(x)[1]
 
-	x_scaled = r(x)
+	x_scaled = x#r(x)
 	X_scaled = create_X(x_scaled,p)
 
 	step_size = inv(maximum(eigvals(X_scaled*X_scaled')))
@@ -84,17 +84,17 @@ function model(w, x, p)
 	:param: polynomial order
 	:return: predicted values
 	"""
-	x_scaled = r(x)
+	x_scaled = x#r(x)
 	X_scaled = create_X(x_scaled,p)
 	return (w[:,end]'*X_scaled)'
 end
 
 #### Task 2-3 ####
 x,y = leastsquares_data() # Given Data
-p = 8 # Polynomial order
-λ = 0 # Regression factor
+p = 10 # Polynomial order
+λ = 0.1 # Regression factor
 q = 2
-w = least_squares(x, y, p, λ, q, 500000000)
+w = least_squares(x, y, p, λ, q, 5000000)
 
 plot(x,y, seriestype=:scatter, marker = 3,label="(x,y)data", xlims=[-1.05,3.05],ylims=[-7,7])
 
@@ -105,7 +105,7 @@ plot!(x_axis,y_model, ylims=(-10,10),label="model_w(x)")
 ylabel!("y")
 xlabel!("rescaled x")
 
-savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2/task4p1.png")
+savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2/task4p10_wopre.png")
 
 #### Model convergence rate
 itrs_w = ones(size(w)[2])
@@ -115,8 +115,8 @@ for i = 1:length(itrs_w)-1
 	itrs_w[i] = opnorm((w[:,i+1]-w[:,i])')
 end
 
-plot(log.(itrs_w), xlims=[0,500000000], margin=5Plots.mm)
-ylabel!("log(||y_i+1-y_i||)")
+plot(log.(itrs_w), xlims=[0,4000000], margin=5Plots.mm)
+ylabel!("log(||w_i+1-w_i||)")
 xlabel!("iterations")
 
-savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2/task2p7_c.png")
+savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task4/task4p10_wopre_c.png")
