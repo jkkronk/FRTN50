@@ -3,6 +3,7 @@ include("problem.jl")
 using Plots
 using LinearAlgebra
 using ProximalOperators
+using Statistics
 
 ##################################
 #Support Vector Machines
@@ -61,9 +62,9 @@ function model(w,x,y,x_pred,λ,σ)
 	:param: weight vector
 	:param: x data
 	:param: y data
-	:param: lambda regularization factor
-
-	:return: predicted values
+	:param: lambda - regularization factor
+	:param: sigma - lenght-scale, smoothness param
+	:return: predicted labels
 	"""
 	M = length(x)
 	K_pred = zeros(M)
@@ -73,32 +74,52 @@ function model(w,x,y,x_pred,λ,σ)
 	end
 
 	Y = Diagonal(y)
-
 	y_pred = sign((-1/λ)*(w'*Y*K_pred)')
-	return y_pred
+
+	return 1 #y_pred
 end
 
 ############################
-# TASK 6 test
+# TesT
 ############################
-function test_6()
+
+#λ ∈ {0.1, 0.01, 0.001, 0.0001} and σ ∈ {1, 0.5, 0.25}.
+function test_6(test)
 	x,y = svm_train()
-	x_test,y_test = svm_test_1()
-	λ = 0.5
-	σ = 0.01
+	λ = 0.00001
+	σ = 0.25
 	itrs = 10000
+
+	if test == 1
+		x_test,y_test = svm_test_1()
+	elseif test == 2
+		x_test,y_test = svm_test_2()
+	elseif test == 3
+		x_test,y_test = svm_test_3()
+	else
+		x_test,y_test = svm_test_4()
+	end
 
 	w = svm(x,y,σ,λ,itrs)
 
-	pred_corr = zeros(length(x_test))
+	pred_valid_corr = zeros(length(x))
+	for i = 1:length(x)
+		y_pred_valid = model(w[:,end],x,y,x[i],λ,σ)
+		if y_pred_valid == y[i]
+			pred_valid_corr[i] = 1
+		end
+	end
 
+	print("Train set Error rate: ",1-mean(pred_valid_corr))
+
+	pred_corr = zeros(length(x_test))
 	for i = 1:length(x_test)
 		y_pred = model(w[:,end],x,y,x_test[i],λ,σ)
 		if y_pred == y_test[i]
 			pred_corr[i] = 1
 		end
+
 	end
-	print(mean(pred_corr))
 
-
+	print("\nValidation set ",test  ," Error rate: ",1-mean(pred_corr))
 end
