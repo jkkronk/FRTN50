@@ -91,10 +91,10 @@ end
 
 #### Task 2-3 ####
 x,y = leastsquares_data() # Given Data
-p = 3 # Polynomial order
+p = 8 # Polynomial order
 λ = 0 # Regression factor
 q = 2
-w = least_squares(x, y, p, λ, q, 5000000)
+w = least_squares(x, y, p, λ, q, 500000000)
 
 plot(x,y, seriestype=:scatter, marker = 3,label="(x,y)data", xlims=[-1.05,3.05],ylims=[-7,7])
 
@@ -105,16 +105,18 @@ plot!(x_axis,y_model, ylims=(-10,10),label="model_w(x)")
 ylabel!("y")
 xlabel!("rescaled x")
 
-#savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task4/task4p3l0d2.png")
+savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2/task4p1.png")
 
 #### Model convergence rate
-itrs_w = zeros(size(w)[2])
-for i = 1:length(itrs_w)
-	itrs_w[i] = opnorm((w[:,i])')
+itrs_w = ones(size(w)[2])
+for i = 1:length(itrs_w)-1
+	#y_i = (w[:,i]'*X_scaled)'
+
+	itrs_w[i] = opnorm((w[:,i+1]-w[:,i])')
 end
 
-plot(itrs_w, ylim=[0,25],xlim=[0,500])
-ylabel!("|w|")
+plot(log.(itrs_w), xlims=[0,500000000], margin=5Plots.mm)
+ylabel!("log(||y_i+1-y_i||)")
 xlabel!("iterations")
 
-#savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task4/task4p3l0d2_c.png")
+savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task2/task2p7_c.png")
