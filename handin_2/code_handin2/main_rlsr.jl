@@ -5,7 +5,7 @@ using LinearAlgebra
 using ProximalOperators
 
 ##################################
-#Least Squares Regression
+#Regularized Least Squares Regression
 ##################################
 
 #### TASK 1 ####
@@ -53,7 +53,7 @@ function least_squares(x, y, p, λ, q ,itrs)
 	"""
 	n= size(x)[1]
 
-	x_scaled = x#r(x)
+	x_scaled = r(x)
 	X_scaled = create_X(x_scaled,p)
 
 	step_size = inv(maximum(eigvals(X_scaled*X_scaled')))
@@ -84,7 +84,7 @@ function model(w, x, p)
 	:param: polynomial order
 	:return: predicted values
 	"""
-	x_scaled = x#r(x)
+	x_scaled = r(x)
 	X_scaled = create_X(x_scaled,p)
 	return (w[:,end]'*X_scaled)'
 end
