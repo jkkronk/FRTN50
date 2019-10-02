@@ -4,6 +4,8 @@ using Plots
 using LinearAlgebra
 using ProximalOperators
 using Statistics
+using Random
+
 
 ##################################
 #Support Vector Machines
@@ -133,6 +135,36 @@ function test_6(test)
 	xlabel!("iterations")
 
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task7/00001025_c.png")
+end
+
+function kfold(k=10, σ=0.25, λ=0.0001)
+	itrs = 10000
+	x,y = svm_train()
+	indx = randperm(length(x))
+	set_size = Int(length(x)/k)
+	results = zeros(k)
+	for i=1:k-1
+		a = zeros(set_size)
+		for j=1:set_size
+			a[j] = (popfirst!(indx))
+		end
+		a = round.(Int, a)
+		xx = x[indx]
+		yy = y[indx]
+		valx = x[a]
+		valy = y[a]
+		v = svm(xx,yy,σ,λ,itrs)
+		y_rate = zeros(length(valx))
+		for j=1:length(valx)
+
+			y_pred = model(v[:,end], xx, yy, valx[j], λ, σ)
+			if y_pred == valy[j]
+				y_rate[j] = 1
+			end
+		end
+		results[i] = 1 - mean(y_rate)
+	end
+	return mean(results)
 end
 
 function holdout_valid()
