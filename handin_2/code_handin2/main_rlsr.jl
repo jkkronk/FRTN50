@@ -92,9 +92,10 @@ end
 #### Task 2-3 ####
 x,y = leastsquares_data() # Given Data
 p = 10 # Polynomial order
-λ = 0.1 # Regression factor
-q = 2
-w = least_squares(x, y, p, λ, q, 5000000)
+λ = 10 # Regression factor
+q = 1
+w = least_squares(x, y, p, λ, q, 500000)
+print(w[:,end])
 
 plot(x,y, seriestype=:scatter, marker = 3,label="(x,y)data", xlims=[-1.05,3.05],ylims=[-7,7])
 
