@@ -76,7 +76,7 @@ function model(w,x,y,x_pred,λ,σ)
 	Y = Diagonal(y)
 	y_pred = sign((-1/λ)*(w'*Y*K_pred)')
 
-	return 1 #y_pred
+	return y_pred
 end
 
 ############################
@@ -86,9 +86,9 @@ end
 #λ ∈ {0.1, 0.01, 0.001, 0.0001} and σ ∈ {1, 0.5, 0.25}.
 function test_6(test)
 	x,y = svm_train()
-	λ = 0.00001
-	σ = 0.25
-	itrs = 10000
+	λ = 0.1
+	σ = 1
+	itrs = 100000
 
 	if test == 1
 		x_test,y_test = svm_test_1()
@@ -122,4 +122,15 @@ function test_6(test)
 	end
 
 	print("\nValidation set ",test  ," Error rate: ",1-mean(pred_corr))
+
+	itrs_w = ones(size(w)[2])
+	for i = 1:length(itrs_w)-1
+		itrs_w[i] = opnorm((w[:,i+1]-w[:,i])')
+	end
+
+	plot(log.(itrs_w), xlims=[0,10000], margin=5Plots.mm)
+	ylabel!("log(||w_i+1-w_i||)")
+	xlabel!("iterations")
+
+	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task7/00001025_c.png")
 end
