@@ -134,3 +134,14 @@ function test_6(test)
 
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task7/00001025_c.png")
 end
+
+function holdout_valid()
+	x,y = svm_train()
+	λ = 0.0001
+	σ = 0.25
+	itrs = 100000
+
+	randperm()
+
+
+end
