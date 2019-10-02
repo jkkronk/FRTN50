@@ -135,13 +135,71 @@ function test_6(test)
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task7/00001025_c.png")
 end
 
-function holdout_valid()
+function holdout_valid(σ = 0.25, λ = 0.0001)
 	x,y = svm_train()
-	λ = 0.0001
-	σ = 0.25
-	itrs = 100000
+	itrs = 10000
 
-	randperm()
+	N = randperm(length(x))
+	N_hold = N[1:100]
+	N_mod = N[101:end]
+
+	valx = x[N_hold]
+	valy = y[N_hold]
+
+	x_mod = x[N_mod]
+	y_mod = y[N_mod]
+
+	w = svm(x_mod,y_mod,σ,λ,itrs)
+
+	pred_corr = zeros(length(valx))
+	for i = 1:length(valx)
+		y_pred = model(w[:,end],x_mod,y_mod,valx[i],λ,σ)
+		if y_pred == valy[i]
+			pred_corr[i] = 1
+		end
+
+	end
+
+	return 1-mean(pred_corr)
+end
+
+function eval_task9(itrs = 11)
+	print("--- HOLDOUT EVALUATION ---")
+
+	holdout_eval = zeros(itrs)
+
+	for i = 1:itrs
+		print(i)
+		holdout_eval[i] = holdout_valid()
+		print("\b")
+		if i > 9
+			print("\b")
+		end
+	end
+
+	print("\nMean: ", mean(holdout_eval), "\nVariance: ", var(holdout_eval))
+
+	histogram(holdout_eval, bins=20)
+	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task9/hist_holdout.png")
+
+	print("\n--- K FOLDS EVALUATION ---")
+
+	kfolds_eval = zeros(itrs)
+
+	for i = 1:itrs
+		print(i)
+		kfolds_eval[i] = kfolds(10)
+		print("\b")
+		if i > 9
+			print("\b")
+		end
+	end
+
+	print("\nMean: ", mean(kfolds_eval), "\nVariance: ", var(kfolds_eval))
+
+	histogram(kfolds_eval, bins=20)
+	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_2/plots_hi2/task9/hist_kfolds.png")
+
 
 
 end
