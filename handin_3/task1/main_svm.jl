@@ -53,22 +53,22 @@ function svm(x, y, σ, λ, itrs, gradient)
 	t_k0 = 1
 
 	for i = 3:itrs
-		grad_Q = Q*w[:,i-1]
-
 		if gradient == 0
 			w_k_half = w[:,i-1]
 		elseif gradient == 1
 			β = (i-2)/(i+1)
-			w_k_half = w[:,i-1] + β .* (w[:,i-1] - w[:,i-2])
+			w_k_half = w[:,i-1] + β * (w[:,i-1] - w[:,i-2])
 		elseif gradient == 2
 			t_k1 = (1+sqrt(1+4(t_k0)^2))/2
 			β = (t_k0 - 1)/t_k1
-			w_k_half = w[:,i-1] + β .* (w[:,i-1] - w[:,i-2])
+			w_k_half = w[:,i-1] + β * (w[:,i-1] - w[:,i-2])
+			t_k0 = t_k1
 		elseif gradient == 3
-			μ = 1
+			μ = 100
 			β = (1-sqrt(μ * λ)) / (1+sqrt(μ * λ))
-			w_k_half = w[:,i-1] + β .* (w[:,i-1] - w[:,i-2])
+			w_k_half = w[:,i-1] + β * (w[:,i-1] - w[:,i-2])
 		end
+		grad_Q = Q*w_k_half
 		w[:,i], _ = prox(h_con, w_k_half - step_size .*  grad_Q, step_size)
 	end
 
@@ -195,12 +195,13 @@ function test_1(test)
 		itrs_w3[i] = opnorm((w3[:,i]-w0[:,end])')
 	end
 
-	plot(log.(itrs_w0), xlims=[0,9000], label = "w0", margin=5Plots.mm)
+	ploty = 300
+	plot(log.(itrs_w0), xlims=[0,ploty], label = "w0", margin=5Plots.mm)
 	ylabel!("log(||w_i-w^*||)")
 	xlabel!("iterations")
-	plot!(log.(itrs_w1), xlims=[0,9000], label = "w1", margin=5Plots.mm)
-	#plot!(log.(itrs_w2), xlims=[0,9000], label = "w2", margin=5Plots.mm)
-	plot!(log.(itrs_w3), xlims=[0,9000], label = "w3", margin=5Plots.mm)
+	plot!(log.(itrs_w1), xlims=[0,ploty], label = "w1", margin=5Plots.mm)
+	plot!(log.(itrs_w2), xlims=[0,ploty], label = "w2", margin=5Plots.mm,  linestyle = :dash)
+	plot!(log.(itrs_w3), xlims=[0,ploty], label = "w3", margin=5Plots.mm)
 
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_3/task1/plots/1.png")
 end
