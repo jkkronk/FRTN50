@@ -268,26 +268,38 @@ function task_2()
 	σ = 0.25 # from handin 2
 
 	print("Training model, w0... \n")
-	@time w0 = svm(x,y,σ,λ,110,0)
+	@time w0 = svm(x,y,σ,λ,120,0)
 	print("Training model, w1... \n")
 	@time w1 = svm(x,y,σ,λ,200,1)
 	print("Training model, w2... \n")
 	@time w2 = svm(x,y,σ,λ,200,2)
 	print("Training model, w3... \n")
-	@time w3 = svm(x,y,σ,λ,60,3)
+	@time w3 = svm(x,y,σ,λ,70,3)
 	print("Training model, coord uniform choise step size... \n")
 	@time w4 = svm_cord(x,y,σ,λ,65000,0)
 	print("Training model, coord coordinate wise step size... \n")
-	@time w5 = svm_cord(x,y,σ,λ,35000,1)
+	@time w5 = svm_cord(x,y,σ,λ,33000,1)
 
 
 	itrs_w0 = ones(size(w0)[2])
+	itrs_w1 = ones(size(w1)[2])
+	itrs_w2 = ones(size(w2)[2])
+	itrs_w3 = ones(size(w3)[2])
 	itrs_w4 = ones(size(w4)[2])
 	itrs_w5 = ones(size(w5)[2])
 	x_coord_plot4 = ones(size(w4)[2])
 	x_coord_plot5 = ones(size(w5)[2])
 	for i = 1:length(itrs_w0)-1
 		itrs_w0[i] = opnorm((w0[:,i]-w0[:,end])')
+	end
+	for i = 1:length(itrs_w1)-1
+		itrs_w1[i] = opnorm((w1[:,i]-w0[:,end])')
+	end
+	for i = 1:length(itrs_w2)-1
+		itrs_w2[i] = opnorm((w2[:,i]-w0[:,end])')
+	end
+	for i = 1:length(itrs_w3)-1
+		itrs_w3[i] = opnorm((w3[:,i]-w0[:,end])')
 	end
 	for i = 1:length(itrs_w4)-1
 		itrs_w4[i] = opnorm((w4[:,i]-w0[:,end])')
@@ -306,6 +318,19 @@ function task_2()
 	plot!(x_coord_plot5[1:end-2], log.(itrs_w5)[1:end-2], xlims=[0,ploty], label = "coordinate wise step size", margin=5Plots.mm)
 
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_3/task1_2/plots/2.png")
+
+	ploty = 1000
+	plot(log.(itrs_w0)[1:end-2], xlims=[0,ploty], label = "w0", margin=5Plots.mm)
+	ylabel!("log(||w_i-w^*||)")
+	xlabel!("normalized iterations")
+	plot!(log.(itrs_w1)[1:end-2], xlims=[0,ploty], label = "w1", margin=5Plots.mm)
+	plot!(log.(itrs_w2)[1:end-2], xlims=[0,ploty], label = "w2", margin=5Plots.mm,  linestyle = :dash )
+	plot!(log.(itrs_w3)[1:end-2], xlims=[0,ploty], label = "w3", margin=5Plots.mm)
+	plot!(x_coord_plot4[1:end-2]./size(x_coord_plot4[1:end-2]), log.(itrs_w4)[1:end-2], xlims=[0,ploty], label = "uniform choise step size", margin=5Plots.mm)
+	plot!(x_coord_plot5[1:end-2]./size(x_coord_plot5[1:end-2]), log.(itrs_w5)[1:end-2], xlims=[0,ploty], label = "coordinate wise step size", margin=5Plots.mm)
+
+	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_3/task1_2/plots/3.png")
+
 end
 
 task_2()
