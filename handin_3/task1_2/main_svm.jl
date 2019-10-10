@@ -314,8 +314,8 @@ function task_2()
 	plot(log.(itrs_w0), xlims=[0,ploty], label = "w0", margin=5Plots.mm)
 	ylabel!("log(||w_i-w^*||)")
 	xlabel!("iterations")
-	plot!(x_coord_plot4[1:end-2], log.(itrs_w4)[1:end-2], xlims=[0,ploty], label = "uniform choise step size", margin=5Plots.mm)
-	plot!(x_coord_plot5[1:end-2], log.(itrs_w5)[1:end-2], xlims=[0,ploty], label = "coordinate wise step size", margin=5Plots.mm)
+	plot!(x_coord_plot4[1:end-2], log.(itrs_w4)[1:end-2], xlims=[0,ploty], label = "uniform choise step size", margin=5Plots.mm, color = :red)
+	plot!(x_coord_plot5[1:end-2], log.(itrs_w5)[1:end-2], xlims=[0,ploty], label = "coordinate wise step size", margin=5Plots.mm, color = :orange)
 
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_3/task1_2/plots/2.png")
 
@@ -326,11 +326,10 @@ function task_2()
 	plot!(log.(itrs_w1)[1:end-2], xlims=[0,ploty], label = "w1", margin=5Plots.mm)
 	plot!(log.(itrs_w2)[1:end-2], xlims=[0,ploty], label = "w2", margin=5Plots.mm,  linestyle = :dash )
 	plot!(log.(itrs_w3)[1:end-2], xlims=[0,ploty], label = "w3", margin=5Plots.mm)
-	plot!(x_coord_plot4[1:end-2]./size(x_coord_plot4[1:end-2]), log.(itrs_w4)[1:end-2], xlims=[0,ploty], label = "uniform choise step size", margin=5Plots.mm)
-	plot!(x_coord_plot5[1:end-2]./size(x_coord_plot5[1:end-2]), log.(itrs_w5)[1:end-2], xlims=[0,ploty], label = "coordinate wise step size", margin=5Plots.mm)
+	plot!(x_coord_plot4[1:end-2]./size(x_coord_plot4), log.(itrs_w4)[1:end-2], xlims=[0,ploty], label = "uniform choise step size", margin=5Plots.mm, color = :red)
+	plot!(x_coord_plot5[1:end-2]./size(x_coord_plot5), log.(itrs_w5)[1:end-2], xlims=[0,ploty], label = "coordinate wise step size", margin=5Plots.mm, color = :orange)
 
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_3/task1_2/plots/3.png")
-
 end
 
 task_2()
