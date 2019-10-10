@@ -1,15 +1,15 @@
 using LinearAlgebra, Statistics, Random
 
 # We define some useful activation functions
-sigmoid(x) = exp(x)/(1 + exp(x))
-#+++ relu
-#+++ leakyrelu
+sigmoid(x::Float64) = exp(x)/(1 + exp(x))
+relu(x::Float64) = x < 0.0 ? 0.0 : x
+leakyrelu(x::Float64) = x < 0.0 ? 0.2*x : x
 
 # And methods to calculate their derivatives
 derivative(f::typeof(sigmoid), x::Float64) = sigmoid(x)*(1-sigmoid(x))
 derivative(f::typeof(identity), x::Float64) = one(x)
-#+++ derivative of relu
-#+++ derivative of leakyrelu
+derivative(f::typeof(relu), x::Float64) = x < 0.0 ? 0.0 : 1.0
+derivative(f::typeof(leakyrelu), x::Float64) = x < 0.0 ? 0.2 : 1.0
 
 # Astract type, all layers will be a subtype of `Layer`
 abstract type Layer{T} end
@@ -45,10 +45,10 @@ end
     Compute the output `out` from the layer.
     Store the input to the activation function in l.x and the output in l.out. """
 function (l::Dense)(z)
-    #+++ Implement the definition of a Dense layer here
-    #+++
-    #+++
-    #+++
+    x = l.W * z + l.b
+    l.x .= x
+    out = l.σ.(x)
+    l.out .= out
 end
 
 # A network is just a sequence of layers
@@ -59,11 +59,10 @@ end
 """ out = n(z)
     Comute the result of applying each layer in a network to the previous output. """
 function (n::Network)(z)
-    #+++ Implement evaluation of a network here
-    #+++
-    #+++
-    #+++
-    #+++
+    for layer in n.layers
+        z = layer(z)
+    end
+    return z
 end
 
 """ δ = backprop!(l::Dense, δnext, zin)
@@ -71,9 +70,14 @@ end
     calculate the l.δ = ∂L/∂zᵢ given δᵢ₊₁ and zᵢ,
     and save l.∂W = ∂L/∂Wᵢ and l.∇b = (∂L/∂bᵢ)ᵀ """
 function backprop!(l::Dense, δnext, zin)
-    #+++ Implement back-propagation of a dense layer here
-    #+++
-    #+++
+
+    l.∇b .= δnext .* derivative.(l.σ, l.W * zin + l.b)
+    l.∂W .= l.∇b * zin'
+    l.δ .= l.W' * l.∇b
+
+    #
+    # l.∂W .= l.∇b * zin'
+    # l.δ .= l.W' * l.∇b
     return l.δ
 end
 
