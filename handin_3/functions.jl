@@ -96,10 +96,6 @@ function backprop!(n::Network, input, ∂J∂y)
 end
 
 
-
-
-
-
 # This can be used to get a list of all parameters and gradients from a Dense layer
 getparams(l::Dense) = ([l.W, l.b], [l.∂W, l.∇b])
 
@@ -251,7 +247,7 @@ plot(-4:0.01:4, [fsol.(xi)[1] for xi in -4:0.01:4], c=:blue)
 scatter!(xs, ys, lab="", m=(:cross,0.2,:blue))
 scatter!(xs, [copy(n(xi)) for xi in xs], m=(:circle,0.2,:red))
 
-savefig("/Users/filipkronstrom/Documents/LTH/FRTN50/handin_3/task3/plots/adam2_newNetwork.png")
+savefig("/home/filip/Documents/FRTN50/FRTN50/handin_3/task3/plots/t3_corr.png")
 
 # We can calculate the mean error over the training data like this also
 getloss(n, xs, ys, sumsquares)
