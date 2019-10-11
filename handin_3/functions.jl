@@ -87,7 +87,7 @@ function backprop!(n::Network, input, ∂J∂y)
     δ = ∂J∂y
     # Iterate through layers, starting at the end
     for i in length(layers):-1:2
-        δ = backprop!(layers[i], δ, layers[i-1].out)
+        δ = backprop!(layers[i], δ, layers[i-1].x)
     end
     # To first layer, the input was `input`
     zin = input
@@ -166,10 +166,8 @@ function update!(At::ADAMTrainer)
         m .= β1 .* m .+ (1 - β1) .* ∇p
         mh .= m ./ (1 - β1^t)
         v .= β2 .* v .+ (1 - β2) .* ∇p.^2
-        vh = v ./ (1 - β2^t)
-
-        # Take the ADAM step
-        p = p .- γ .* mh ./ (sqrt.(vh) .+ ϵ)
+        vh .= v ./ (1 - β1^t)
+        p .= p .- γ .* mh ./ (sqrt.(vh) .- ϵ)
     end
     At.t[] = t+1     # At.t is a reference, we update the value t like this
     return
@@ -234,7 +232,7 @@ testys = [fsol(xi) for xi in testxs]
 adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.0001)
 
 ### Train and plot
-using Plots
+using Plot
 # Train once over the data set
 @time train!(n, adam, xs, ys, sumsquares)
 scatter(xs, [copy(n(xi)) for xi in xs])
