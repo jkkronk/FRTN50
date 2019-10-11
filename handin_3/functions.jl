@@ -164,7 +164,7 @@ function update!(At::ADAMTrainer)
         v .= β2 .* v .+ (1 - β2) .* ∇p.^2 # β2vt−1 + (1 − β2) (∇pt−1)^2
         vh .= v ./ (1 - β1^t) # vt/(1 − (β2)^t)
         # Take the ADAM step
-        p .= p .- γ .* mh ./ (sqrt.(vh) .- ϵ) # pt−1 − γ (mˆt / (√vˆt + e)
+        p .= p .- γ .* mh ./ (sqrt.(vh) .+ ϵ) # pt−1 − γ (mˆt / (√vˆt + e)
     end
     At.t[] = t+1     # At.t is a reference, we update the value t like this
     return
