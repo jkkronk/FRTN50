@@ -160,11 +160,11 @@ function update!(At::ADAMTrainer)
         # Update ADAM parameters
         m .= β1 .* m .+ (1 - β1) .* ∇p
         mh .= m ./ (1 - β1^t)
-        v .= β2 .* v .+ (1 - β2) .* ∇p^2
+        v .= β2 .* v .+ (1 - β2) .* ∇p.^2
         vh = v ./ (1 - β2^t)
 
         # Take the ADAM step
-        p = p .- γ .* mh ./ (sqrt(v) + ϵ)
+        p = p .- γ .* mh ./ (sqrt.(vh) .+ ϵ)
     end
     At.t[] = t+1     # At.t is a reference, we update the value t like this
     return
@@ -234,6 +234,8 @@ using Plots
 @time train!(n, adam, xs, ys, sumsquares)
 scatter(xs, [copy(n(xi)) for xi in xs])
 
+savefig("/Users/filipkronstrom/Documents/LTH/FRTN50/handin_3/task3/plots/adam1_newNetwork.png")
+
 # Train 100 times over the data set
 for i = 1:100
     # Random ordering of all the data
@@ -246,6 +248,8 @@ plot(-4:0.01:4, [fsol.(xi)[1] for xi in -4:0.01:4], c=:blue)
 scatter!(xs, ys, lab="", m=(:cross,0.2,:blue))
 scatter!(xs, [copy(n(xi)) for xi in xs], m=(:circle,0.2,:red))
 
+savefig("/Users/filipkronstrom/Documents/LTH/FRTN50/handin_3/task3/plots/adam2_newNetwork.png")
+
 # We can calculate the mean error over the training data like this also
 getloss(n, xs, ys, sumsquares)
 # Loss over test data like this
@@ -255,6 +259,7 @@ getloss(n, testxs, testys, sumsquares)
 plot(-8:0.01:8, [fsol.(xi)[1] for xi in -8:0.01:8], c=:blue);
 # Plot full network result
 plot!(-8:0.01:8, [copy(n([xi]))[1] for xi in -8:0.01:8], c=:red)
+# print([copy(n([xi]))[1] for xi in -8:0.01:8])
 
 #########################################################
 #########################################################
