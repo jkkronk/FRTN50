@@ -45,10 +45,12 @@ end
     Compute the output `out` from the layer.
     Store the input to the activation function in l.x and the output in l.out. """
 function (l::Dense)(z)
-    x = l.W * z + l.b
-    l.x .= x
-    out = l.σ.(x)
-    l.out .= out
+    l.x[:,:] = l.W*z + l.b
+    l.out[:,:] = l.σ.(l.x)
+    #x = l.W * z + l.b
+    #l.x .= x
+    #out = l.σ.(x)
+    #l.out .= out
 end
 
 # A network is just a sequence of layers
@@ -57,7 +59,7 @@ struct Network{T,N<:Layer{T}}
 end
 
 """ out = n(z)
-    Comute the result of applying each layer in a network to the previous output. """
+    Compute the result of applying each layer in a network to the previous output. """
 function (n::Network)(z)
     for layer in n.layers
         z = layer(z)
@@ -70,9 +72,9 @@ end
     calculate the l.δ = ∂L/∂zᵢ given δᵢ₊₁ and zᵢ,
     and save l.∂W = ∂L/∂Wᵢ and l.∇b = (∂L/∂bᵢ)ᵀ """
 function backprop!(l::Dense, δnext, zin)
-    l.∇b .= δnext .* derivative.(l.σ, l.W * zin + l.b)
-    l.∂W .= l.∇b * zin'
-    l.δ .= l.W' * l.∇b
+    l.∇b .= δnext .* derivative.(l.σ, l.W * zin + l.b) # ∇bi L = δi+1 .* grad σ'i(¯zi), z¯i = Wi zi + bi
+    l.∂W .= l.∇b * zin' #  σ/wL =(∇bi L) zT
+    l.δ .= l.W' * l.∇b # WTi (∇bi L)
     return l.δ
 end
 
@@ -159,11 +161,12 @@ function update!(At::ADAMTrainer)
         m, mh, v, vh = At.ms[i], At.mhs[i], At.vs[i], At.vhs[i]
 
         # Update ADAM parameters
-        m .= β1 .* m .+ (1 - β1) .* ∇p
-        mh .= m ./ (1 - β1^t)
-        v .= β2 .* v .+ (1 - β2) .* ∇p.^2
-        vh .= v ./ (1 - β1^t)
-        p .= p .- γ .* mh ./ (sqrt.(vh) .+ ϵ)
+        m .= β1 .* m .+ (1 - β1) .* ∇p # β1mt−1 + (1 − β1)∇pt−1
+        mh .= m ./ (1 - β1^t) # mt/(1 − (β1)^t)
+        v .= β2 .* v .+ (1 - β2) .* ∇p.^2 # β2vt−1 + (1 − β2) (∇pt−1)^2
+        vh .= v ./ (1 - β1^t) # vt/(1 − (β2)^t)
+        # Take the ADAM step
+        p .= p .- γ .* mh ./ (sqrt.(vh) .- ϵ) # pt−1 − γ (mˆt / (√vˆt + e)
     end
     At.t[] = t+1     # At.t is a reference, we update the value t like this
     return
@@ -178,12 +181,13 @@ function train!(n, alg, xs, ys, lossfunc)
     lossall = 0.0           # This will keep track of the sum of the losses
 
     for i in eachindex(xs)  # For each data point
-        xi = xs[i]          # Get data
-        yi = ys[i]          # And expected output
-
+        #+++ Do a forward and backwards pass
+        #+++ with `xi`, `yi, and
         out = n(xi)
         ∂J∂y = derivative(lossfunc, out, yi)
         backprop!(n, xi, ∂J∂y)
+        backprop!(n, xi, derivative(lossfunc, out, yi))
+        #+++ update parameters using `alg`
         update!(alg)
 
         loss = lossfunc(out, yi)
@@ -299,6 +303,32 @@ getloss(n, testxs, testys, sumsquares)
 #########################################################
 #########################################################
 ### Task 5:
+l1 = Dense(30, 1, leakyrelu, 0.0, 3.0, 0.0, 0.1)
+lis = [Dense(30, 30, leakyrelu, 0.0, 3.0, 0.0, 0.1) for i = 1:4]
+# Last layer has no activation function (identity)
+ln = Dense(1, 30, identity, 0.0, 1.0, 0.0, 0.1)
+n = Network([l1, lis..., ln])
+
+### Define data, in range [-4,4]
+xs = [rand(1).*8 .- 4 for i = 1:30]
+ys = [fsol(xi).+ 0.1.*randn(1) for xi in xs]
+# Test data
+testxs = [rand(1).*8 .- 4 for i = 1:1000]
+testys = [fsol(xi) for xi in testxs]
+
+### Define algorithm
+adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.0001)
+
+# Train 100 times over the data set
+for i = 1:1000
+    # Random ordering of all the data
+    Iperm = randperm(length(xs))
+    @time train!(n, adam, xs[Iperm], ys[Iperm], sumsquares)
+end
+
+plot(-4:0.01:4, [fsol.(xi)[1] for xi in -4:0.01:4], c=:blue)
+scatter!(xs, ys, lab="", m=(:cross,0.2,:blue))
+scatter!(xs, [copy(n(xi)) for xi in xs], m=(:circle,0.2,:red))
 
 
 getloss(n, xs, ys, sumsquares)
@@ -307,7 +337,41 @@ getloss(n, testxs, testys, sumsquares)
 #########################################################
 #########################################################
 ### Task 6:
+l1 = Dense(30, 2, leakyrelu, 0.0, 3.0, 0.0, 0.1)
+lis = [Dense(30, 30, leakyrelu, 0.0, 3.0, 0.0, 0.1) for i = 1:4]
+# Last layer has no activation function (identity)
+ln = Dense(1, 30, identity, 0.0, 1.0, 0.0, 0.1)
+n = Network([l1, lis..., ln])
+
 fsol(x) = [min(0.5,sin(0.5*norm(x)^2))]
+
+### Define data, in range [-4,4]
+xs1 = [rand(1).*8 .- 4 for i = 1:2000]
+xs2 = [rand(1).*8 .- 4 for i = 1:2000]
+xs = [xs1 xs2]
+ys = [fsol(xi) for xi in eachrow(xs)]
+
+# Test data
+testxs1 = [rand(1).*8 .- 4 for i = 1:1000]
+testxs2 = [rand(1).*8 .- 4 for i = 1:1000]
+testxs = [testxs1 testxs2]
+testys = [fsol(xi) for xi in eachrow(testxs)]
+
+### Define algorithm
+adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.0001)
+
+@time train!(n, adam, xs, ys, sumsquares)
+
+# Train 100 times over the data set
+for i = 1:1000
+    # Random ordering of all the data
+    Iperm = randperm(length(xs))
+    @time train!(n, adam, xs[Iperm], ys[Iperm], sumsquares)
+end
+
+plot(-4:0.01:4, [fsol.(xi)[1] for xi in -4:0.01:4], c=:blue)
+scatter!(xs, ys, lab="", m=(:cross,0.2,:blue))
+scatter!(xs, [copy(n(xi)) for xi in xs], m=(:circle,0.2,:red))
 
 getloss(n, xs, ys, sumsquares)
 getloss(n, testxs, testys, sumsquares)
