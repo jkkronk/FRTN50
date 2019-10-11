@@ -70,14 +70,9 @@ end
     calculate the l.δ = ∂L/∂zᵢ given δᵢ₊₁ and zᵢ,
     and save l.∂W = ∂L/∂Wᵢ and l.∇b = (∂L/∂bᵢ)ᵀ """
 function backprop!(l::Dense, δnext, zin)
-
     l.∇b .= δnext .* derivative.(l.σ, l.W * zin + l.b)
     l.∂W .= l.∇b * zin'
     l.δ .= l.W' * l.∇b
-
-    #
-    # l.∂W .= l.∇b * zin'
-    # l.δ .= l.W' * l.∇b
     return l.δ
 end
 
@@ -92,8 +87,7 @@ function backprop!(n::Network, input, ∂J∂y)
     δ = ∂J∂y
     # Iterate through layers, starting at the end
     for i in length(layers):-1:2
-        #+++ Fill in the missing code here
-        #+++
+        δ = backprop!(layers[i], δ, layers[i-1].out)
     end
     # To first layer, the input was `input`
     zin = input
@@ -164,13 +158,13 @@ function update!(At::ADAMTrainer)
         m, mh, v, vh = At.ms[i], At.mhs[i], At.vs[i], At.vhs[i]
 
         # Update ADAM parameters
-        #+++
-        #+++
-        #+++
-        #+++
+        m .= β1 .* m .+ (1 - β1) .* ∇p
+        mh .= m ./ (1 - β1^t)
+        v .= β2 .* v .+ (1 - β2) .* ∇p^2
+        vh = v ./ (1 - β2^t)
 
         # Take the ADAM step
-        #+++
+        p = p .- γ .* mh ./ (sqrt(v) + ϵ)
     end
     At.t[] = t+1     # At.t is a reference, we update the value t like this
     return
@@ -188,14 +182,10 @@ function train!(n, alg, xs, ys, lossfunc)
         xi = xs[i]          # Get data
         yi = ys[i]          # And expected output
 
-        #+++
-        #+++
-        #+++ Do a forward and backwards pass
-        #+++ with `xi`, `yi, and
-        #+++ update parameters using `alg`
-        #+++
-        #+++
-        #+++
+        out = n(xi)
+        ∂J∂y = derivative(lossfunc, out, yi)
+        backprop!(n, xi, ∂J∂y)
+        update!(alg)
 
         loss = lossfunc(out, yi)
         lossall += loss
