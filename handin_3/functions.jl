@@ -347,9 +347,7 @@ n = Network([l1, lis..., ln])
 fsol(x) = [min(0.5,sin(0.5*norm(x)^2))]
 
 ### Define data, in range [-4,4]
-xs1 = [rand(1).*8 .- 4 for i = 1:2000]
-xs2 = [rand(1).*8 .- 4 for i = 1:2000]
-xs = [xs1 xs2]
+xs = [rand(2).*8 .- 4 for i = 1:2000]
 ys = [fsol(xi) for xi in eachrow(xs)]
 
 # Test data
@@ -361,10 +359,62 @@ testys = [fsol(xi) for xi in eachrow(testxs)]
 ### Define algorithm
 adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.0001)
 
-@time train!(n, adam, xs, ys, sumsquares)
+# Train 100 times over the data set
+for i = 1:100
+    # Random ordering of all the data
+    Iperm = randperm(length(xs))
+    @time train!(n, adam, xs[Iperm], ys[Iperm], sumsquares)
+end
+
+### Lowering Error rate to 10^-5
+adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.00001)
 
 # Train 100 times over the data set
-for i = 1:1000
+for i = 1:100
+    # Random ordering of all the data
+    Iperm = randperm(length(xs))
+    @time train!(n, adam, xs[Iperm], ys[Iperm], sumsquares)
+end
+
+plot(-4:0.01:4, [fsol.(xi)[1] for xi in -4:0.01:4], c=:blue)
+scatter!(xs, ys, lab="", m=(:cross,0.2,:blue))
+scatter!(xs, [copy(n(xi)) for xi in xs], m=(:circle,0.2,:red))
+
+getloss(n, xs, ys, sumsquares)
+getloss(n, testxs, testys, sumsquares)
+
+# Plotttnig that can be used for task 6:
+scatter3d([xi[1] for xi in xs], [xi[2] for xi in xs], [n(xi)[1] for xi in xs], m=(:blue,1, :cross, stroke(0, 0.2, :blue)), size=(1200,800));
+scatter3d!([xi[1] for xi in xs], [xi[2] for xi in xs], [yi[1] for yi in ys], m=(:red,1, :circle, stroke(0, 0.2, :red)), size=(1200,800))
+
+
+#########################################################
+#########################################################
+#########################################################
+### Task 7:
+l1 = Dense(30, 2, relu, 0.0, 3.0, 0.0, 0.1)
+lis = [Dense(30, 30, relu, 0.0, 3.0, 0.0, 0.1) for i = 1:4]
+# Last layer has no activation function (identity)
+ln = Dense(1, 30, relu, 0.0, 1.0, 0.0, 0.1)
+n = Network([l1, lis..., ln])
+
+fsol(x) = [min(0.5,sin(0.5*norm(x)^2))]
+
+### Define data, in range [-4,4]
+xs = [rand(2).*8 .- 4 for i = 1:2000]
+ys = [fsol(xi) for xi in eachrow(xs)]
+
+# Test data
+testxs1 = [rand(1).*8 .- 4 for i = 1:1000]
+testxs2 = [rand(1).*8 .- 4 for i = 1:1000]
+testxs = [testxs1 testxs2]
+testys = [fsol(xi) for xi in eachrow(testxs)]
+
+### Define algorithm
+adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.0001)
+
+# Train 100 times over the data set
+for i = 1:100
     # Random ordering of all the data
     Iperm = randperm(length(xs))
     @time train!(n, adam, xs[Iperm], ys[Iperm], sumsquares)
