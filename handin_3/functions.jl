@@ -167,7 +167,7 @@ function update!(At::ADAMTrainer)
         mh .= m ./ (1 - β1^t)
         v .= β2 .* v .+ (1 - β2) .* ∇p.^2
         vh .= v ./ (1 - β1^t)
-        p .= p .- γ .* mh ./ (sqrt.(vh) .- ϵ)
+        p .= p .- γ .* mh ./ (sqrt.(vh) .+ ϵ)
     end
     At.t[] = t+1     # At.t is a reference, we update the value t like this
     return
@@ -232,7 +232,7 @@ testys = [fsol(xi) for xi in testxs]
 adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.0001)
 
 ### Train and plot
-using Plot
+using Plots
 # Train once over the data set
 @time train!(n, adam, xs, ys, sumsquares)
 scatter(xs, [copy(n(xi)) for xi in xs])
