@@ -95,6 +95,11 @@ function backprop!(n::Network, input, ∂J∂y)
     return
 end
 
+
+
+
+
+
 # This can be used to get a list of all parameters and gradients from a Dense layer
 getparams(l::Dense) = ([l.W, l.b], [l.∂W, l.∇b])
 
@@ -265,6 +270,34 @@ plot!(-8:0.01:8, [copy(n([xi]))[1] for xi in -8:0.01:8], c=:red)
 #########################################################
 #########################################################
 ### Task 4:
+l1 = Dense(30, 1, leakyrelu, 0.0, 3.0, 0.0, 0.1)
+lis = [Dense(30, 30, leakyrelu, 0.0, 3.0, 0.0, 0.1) for i = 1:4]
+# Last layer has no activation function (identity)
+ln = Dense(1, 30, identity, 0.0, 1.0, 0.0, 0.1)
+n = Network([l1, lis..., ln])
+
+### Define data, in range [-4,4]
+xs = [rand(1).*8 .- 4 for i = 1:2000]
+ys = [fsol(xi).+ 0.1.*randn(1) for xi in xs]
+# Test data
+testxs = [rand(1).*8 .- 4 for i = 1:1000]
+testys = [fsol(xi) for xi in testxs]
+
+### Define algorithm
+adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.0001)
+
+# Train 100 times over the data set
+for i = 1:100
+    # Random ordering of all the data
+    Iperm = randperm(length(xs))
+    @time train!(n, adam, xs[Iperm], ys[Iperm], sumsquares)
+end
+
+plot(-4:0.01:4, [fsol.(xi)[1] for xi in -4:0.01:4], c=:blue)
+scatter!(xs, ys, lab="", m=(:cross,0.2,:blue))
+scatter!(xs, [copy(n(xi)) for xi in xs], m=(:circle,0.2,:red))
+
+
 
 getloss(n, xs, ys, sumsquares)
 getloss(n, testxs, testys, sumsquares)
