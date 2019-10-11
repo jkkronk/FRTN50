@@ -45,12 +45,10 @@ end
     Compute the output `out` from the layer.
     Store the input to the activation function in l.x and the output in l.out. """
 function (l::Dense)(z)
-    l.x[:,:] = l.W*z + l.b
-    l.out[:,:] = l.σ.(l.x)
-    #x = l.W * z + l.b
-    #l.x .= x
-    #out = l.σ.(x)
-    #l.out .= out
+    x = l.W * z + l.b
+    l.x .= x
+    out = l.σ.(x)
+    l.out .= out
 end
 
 # A network is just a sequence of layers
@@ -181,6 +179,9 @@ function train!(n, alg, xs, ys, lossfunc)
     lossall = 0.0           # This will keep track of the sum of the losses
 
     for i in eachindex(xs)  # For each data point
+        xi = xs[i]          # Get data
+        yi = ys[i]          # And expected output
+
         #+++ Do a forward and backwards pass
         #+++ with `xi`, `yi, and
         out = n(xi)
