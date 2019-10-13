@@ -233,7 +233,7 @@ using Plots
 @time train!(n, adam, xs, ys, sumsquares)
 scatter(xs, [copy(n(xi)) for xi in xs])
 
-savefig("/Users/filipkronstrom/Documents/LTH/FRTN50/handin_3/task3/plots/adam1_newNetwork.png")
+savefig("/Users/filipkronstrom/Documents/LTH/FRTN50/handin_3/task3/plots/adam1iter.png")
 
 # Train 100 times over the data set
 for i = 1:100
@@ -247,7 +247,7 @@ plot(-4:0.01:4, [fsol.(xi)[1] for xi in -4:0.01:4], c=:blue)
 scatter!(xs, ys, lab="", m=(:cross,0.2,:blue))
 scatter!(xs, [copy(n(xi)) for xi in xs], m=(:circle,0.2,:red))
 
-savefig("/home/filip/Documents/FRTN50/FRTN50/handin_3/task3/plots/t3_corr.png")
+savefig("/Users/filipkronstrom/Documents/LTH/FRTN50/handin_3/task3/plots/iter300bad.png")
 
 # We can calculate the mean error over the training data like this also
 getloss(n, xs, ys, sumsquares)
