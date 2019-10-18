@@ -119,7 +119,7 @@ derivative(::typeof(sumsquares), yhat, y) =  yhat - y
 
 """ Structure for saving all the parameters and states needed for ADAM,
     as well as references to the parameters and gradients """
-struct ADAMTrainer{T,GT}
+mutable struct ADAMTrainer{T,GT}
     n::Network{T}
     β1::T
     β2::T
@@ -351,29 +351,38 @@ xs = [rand(2).*8 .- 4 for i = 1:2000]
 ys = [fsol(xi) for xi in eachrow(xs)]
 
 # Test data
-testxs1 = [rand(1).*8 .- 4 for i = 1:1000]
-testxs2 = [rand(1).*8 .- 4 for i = 1:1000]
-testxs = [testxs1 testxs2]
+testxs = [rand(2).*8 .- 4 for i = 1:2000]
 testys = [fsol(xi) for xi in eachrow(testxs)]
 
 ### Define algorithm
 adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.0001)
 
 # Train 100 times over the data set
-for i = 1:100
+for i = 1:500
+    print("iteration: ", (i), "\n" )
     # Random ordering of all the data
     Iperm = randperm(length(xs))
     @time train!(n, adam, xs[Iperm], ys[Iperm], sumsquares)
+    if getloss(n, xs, ys, sumsquares) < 0.08
+        break
+    end
 end
 
+getloss(n, xs, ys, sumsquares)
+getloss(n, testxs, testys, sumsquares)
 ### Lowering Error rate to 10^-5
-adam = ADAMTrainer(n, 0.95, 0.999, 1e-8, 0.00001)
+adam.γ= adam.γ*0.1
+
 
 # Train 100 times over the data set
-for i = 1:100
+for i = 1:2000
+    print("iteration: ", (i), "\n" )
     # Random ordering of all the data
     Iperm = randperm(length(xs))
     @time train!(n, adam, xs[Iperm], ys[Iperm], sumsquares)
+    if getloss(n, xs, ys, sumsquares) < 0.01
+        break
+    end
 end
 
 plot(-4:0.01:4, [fsol.(xi)[1] for xi in -4:0.01:4], c=:blue)

@@ -280,7 +280,7 @@ function task_2()
 	print("Training model, coord coordinate wise step size... \n")
 	@time w5 = svm_cord(x,y,σ,λ,33000,1)
 
-
+	print(size(w4))
 	itrs_w0 = ones(size(w0)[2])
 	itrs_w1 = ones(size(w1)[2])
 	itrs_w2 = ones(size(w2)[2])
@@ -319,15 +319,16 @@ function task_2()
 
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_3/task1_2/plots/2.png")
 
-	ploty = 1000
+	ploty = 250
 	plot(log.(itrs_w0)[1:end-2], xlims=[0,ploty], label = "w0", margin=5Plots.mm)
 	ylabel!("log(||w_i-w^*||)")
 	xlabel!("normalized iterations")
 	plot!(log.(itrs_w1)[1:end-2], xlims=[0,ploty], label = "w1", margin=5Plots.mm)
 	plot!(log.(itrs_w2)[1:end-2], xlims=[0,ploty], label = "w2", margin=5Plots.mm,  linestyle = :dash )
 	plot!(log.(itrs_w3)[1:end-2], xlims=[0,ploty], label = "w3", margin=5Plots.mm)
-	plot!(x_coord_plot4[1:end-2]./size(x_coord_plot4), log.(itrs_w4)[1:end-2], xlims=[0,ploty], label = "uniform choise step size", margin=5Plots.mm, color = :red)
-	plot!(x_coord_plot5[1:end-2]./size(x_coord_plot5), log.(itrs_w5)[1:end-2], xlims=[0,ploty], label = "coordinate wise step size", margin=5Plots.mm, color = :orange)
+	print(size(x_coord_plot4))
+	plot!(x_coord_plot4[1:end-2]./size(w4[:,1]), log.(itrs_w4)[1:end-2], xlims=[0,ploty], label = "uniform choise step size", margin=5Plots.mm, color = :red)
+	plot!(x_coord_plot5[1:end-2]./size(w5[:,1]), log.(itrs_w5)[1:end-2], xlims=[0,ploty], label = "coordinate wise step size", margin=5Plots.mm, color = :orange)
 
 	savefig("/Users/JonatanMBA/google drive/lth/frtn50/handin_3/task1_2/plots/3.png")
 end
